@@ -12,7 +12,7 @@ namespace ContaCorrente.ApiExtrato.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            options.UseSqlServer(_configuration.GetConnectionString("DataConnectionStrings"));
+            options.UseSqlServer(_configuration.GetSection("DataConnectionStrings").Value);
         }
 
         public DbSet<Transacao> Transacoes { get; set; }

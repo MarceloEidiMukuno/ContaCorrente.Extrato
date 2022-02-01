@@ -21,7 +21,7 @@ namespace ContaCorrente.ApiExtrato.Services
 
             _configuration = configuration;
 
-            _connectionString = _configuration.GetConnectionString("ServiceConnectionString");
+            _connectionString = _configuration.GetSection("ServiceConnectionString").Value;
 
             _queueClient = new QueueClient(_connectionString, QUEUE_TRANSACAO);
         }

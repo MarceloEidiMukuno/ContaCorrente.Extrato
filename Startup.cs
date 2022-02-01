@@ -23,7 +23,7 @@ namespace ContaCorrente.ApiExtrato
             services.AddControllers();
             services.AddDbContext<TransacoesDataContext>(options =>
             {
-                options.UseSqlServer(Configuration.GetConnectionString("DataConnectionStrings"));
+                options.UseSqlServer(Configuration.GetSection("DataConnectionStrings").Value);
             });
 
             services.AddSwaggerGen(c =>
