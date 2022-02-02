@@ -13,6 +13,7 @@ namespace ContaCorrente.ApiExtrato
     {
         private readonly IConfiguration _configuration;
         private readonly IRegisterTransacaoService _registerService;
+
         private readonly MessageBusService _messageService;
         private const string QUEUE_SALDO = "saldo";
 
@@ -41,8 +42,8 @@ namespace ContaCorrente.ApiExtrato
             var messageString = Encoding.UTF8.GetString(message.Body);
             var transacaoModel = JsonConvert.DeserializeObject<Transacao>(messageString);
 
-            if (transacaoModel.Id != 0)
-                transacaoModel.Id = 0;
+            if (transacaoModel.TransacaoId != 0)
+                transacaoModel.TransacaoId = 0;
 
             await _registerService.RegisterAsync(transacaoModel);
 

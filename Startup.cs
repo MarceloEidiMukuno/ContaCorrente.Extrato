@@ -1,5 +1,6 @@
 using System.Linq;
 using ContaCorrente.ApiExtrato.Data;
+using ContaCorrente.ApiExtrato.Models;
 using ContaCorrente.ApiExtrato.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -7,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 
 namespace ContaCorrente.ApiExtrato
@@ -21,11 +23,16 @@ namespace ContaCorrente.ApiExtrato
         {
             services.AddHealthChecks();
             services.AddControllers();
-            services.AddDbContext<TransacoesDataContext>(options =>
-            {
-                options.UseSqlServer(Configuration.GetSection("DataConnectionStrings").Value);
-            });
 
+            services.Configure<TransacoesDatabaseSettings>(
+                Configuration.GetSection(nameof(TransacoesDatabaseSettings)));
+
+            services.AddSingleton<ITransacoesDatabaseSettings>(sp =>
+                sp.GetRequiredService<IOptions<TransacoesDatabaseSettings>>().Value);
+
+            services.AddSingleton<TransacoesDataContext>();
+
+            services.AddSingleton<ProcessTransacao>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
@@ -36,7 +43,6 @@ namespace ContaCorrente.ApiExtrato
                 c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
             });
 
-            services.AddSingleton<ProcessTransacao>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

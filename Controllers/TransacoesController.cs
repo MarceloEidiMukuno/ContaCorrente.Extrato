@@ -11,9 +11,15 @@ namespace ContaCorrente.ApiExtrato.Controllers
     [Route("v1/extrato")]
     public class TransacoesController : ControllerBase
     {
+        private readonly TransacoesDataContext _TransacaoDataContext;
+
+        public TransacoesController(TransacoesDataContext TransacoesDataContext)
+        {
+            _TransacaoDataContext = TransacoesDataContext;
+        }
+
         [HttpGet("{dias:int}")]
         public async Task<IActionResult> Get(
-            [FromServices] TransacoesDataContext context,
             [FromRoute] int dias,
             [FromQuery] int page = 0,
             [FromQuery] int pageSize = 25
@@ -21,23 +27,7 @@ namespace ContaCorrente.ApiExtrato.Controllers
         {
             try
             {
-                var transacoes = await context
-                                .Transacoes
-                                .AsNoTracking()
-                                .Where(x => x.DataCriacao >= DateTime.Now.AddDays(dias * (-1)))
-                                .Select(x => new ListTransacoesViewModel
-                                {
-                                    Agencia = x.Agencia,
-                                    Conta = x.Conta,
-                                    Valor = x.Valor,
-                                    Descricao = x.Descricao,
-                                    DataCriacao = x.DataCriacao,
-                                    TipoTransacao = ((ETipoTransacao)x.TipoTransacao).ToString()
-                                })
-                                .Skip(page * pageSize)
-                                .Take(pageSize)
-                                .OrderByDescending(x => x.DataCriacao)
-                                .ToListAsync();
+                var transacoes = await _TransacaoDataContext.GetTransacoesDia(dias);
 
                 return Ok(new ResultViewModel<dynamic>(new
                 {
@@ -56,7 +46,6 @@ namespace ContaCorrente.ApiExtrato.Controllers
 
         [HttpGet("{agencia}/{conta}")]
         public async Task<IActionResult> GetAgenciaConta(
-            [FromServices] TransacoesDataContext context,
             [FromRoute] string agencia,
             [FromRoute] string conta,
             [FromQuery] int page = 0,
@@ -65,24 +54,7 @@ namespace ContaCorrente.ApiExtrato.Controllers
         {
             try
             {
-                var transacoes = await context
-                                .Transacoes
-                                .AsNoTracking()
-                                .Where(x => x.Agencia == agencia
-                                        && x.Conta == conta)
-                                .Select(x => new ListTransacoesViewModel
-                                {
-                                    Agencia = x.Agencia,
-                                    Conta = x.Conta,
-                                    Valor = x.Valor,
-                                    Descricao = x.Descricao,
-                                    DataCriacao = x.DataCriacao,
-                                    TipoTransacao = ((ETipoTransacao)x.TipoTransacao).ToString()
-                                })
-                                .Skip(page * pageSize)
-                                .Take(pageSize)
-                                .OrderByDescending(x => x.DataCriacao)
-                                .ToListAsync();
+                var transacoes = await _TransacaoDataContext.GetTransacoesAgenciaConta(agencia, conta);
 
                 return Ok(new ResultViewModel<dynamic>(new
                 {
@@ -101,7 +73,6 @@ namespace ContaCorrente.ApiExtrato.Controllers
 
         [HttpGet("{agencia}/{conta}/{dias}")]
         public async Task<IActionResult> GetAgenciaContaDias(
-            [FromServices] TransacoesDataContext context,
             [FromRoute] string agencia,
             [FromRoute] string conta,
             [FromRoute] int dias,
@@ -111,25 +82,7 @@ namespace ContaCorrente.ApiExtrato.Controllers
         {
             try
             {
-                var transacoes = await context
-                                .Transacoes
-                                .AsNoTracking()
-                                .Where(x => x.Agencia == agencia
-                                        && x.Conta == conta
-                                        && x.DataCriacao >= DateTime.Now.AddDays(dias * (-1)))
-                                .Select(x => new ListTransacoesViewModel
-                                {
-                                    Agencia = x.Agencia,
-                                    Conta = x.Conta,
-                                    Valor = x.Valor,
-                                    Descricao = x.Descricao,
-                                    DataCriacao = x.DataCriacao,
-                                    TipoTransacao = ((ETipoTransacao)x.TipoTransacao).ToString()
-                                })
-                                .Skip(page * pageSize)
-                                .Take(pageSize)
-                                .OrderByDescending(x => x.DataCriacao)
-                                .ToListAsync();
+                var transacoes = await _TransacaoDataContext.GetTransacoesAgenciaContaDia(agencia, conta, dias);
 
                 return Ok(new ResultViewModel<dynamic>(new
                 {

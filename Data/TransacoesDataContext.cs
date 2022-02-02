@@ -1,20 +1,35 @@
+using System.Linq.Expressions;
 using ContaCorrente.ApiExtrato.Models;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 
 namespace ContaCorrente.ApiExtrato.Data
 {
-    public class TransacoesDataContext : DbContext
+    public class TransacoesDataContext
     {
 
-        private readonly IConfiguration _configuration;
+        private readonly IMongoCollection<Transacao> _transacao;
 
-        public TransacoesDataContext(IConfiguration configuration) => _configuration = configuration;
-
-        protected override void OnConfiguring(DbContextOptionsBuilder options)
+        public TransacoesDataContext(ITransacoesDatabaseSettings settings)
         {
-            options.UseSqlServer(_configuration.GetSection("DataConnectionStrings").Value);
+            var client = new MongoClient(settings.ConnectionString);
+            var database = client.GetDatabase(settings.DatabaseName);
+
+            _transacao = database.GetCollection<Transacao>(settings.CollectionName);
+
         }
 
-        public DbSet<Transacao> Transacoes { get; set; }
+        public async Task<List<Transacao>> GetTransacoesDia(int dia) =>
+           await _transacao.Find<Transacao>(x => x.DataCriacao >= DateTime.Now.AddDays(dia * (-1))).ToListAsync();
+
+        public async Task<List<Transacao>> GetTransacoesAgenciaConta(string agencia, string conta) =>
+            await _transacao.Find<Transacao>(x =>
+                        x.Agencia == agencia &&
+                        x.Conta == conta).ToListAsync();
+        public async Task<List<Transacao>> GetTransacoesAgenciaContaDia(string agencia, string conta, int dia) =>
+            await _transacao.Find<Transacao>(x =>
+                x.Agencia == agencia &&
+                x.Conta == conta &&
+                x.DataCriacao >= DateTime.Now.AddDays(dia * (-1))).ToListAsync();
+
     }
 }

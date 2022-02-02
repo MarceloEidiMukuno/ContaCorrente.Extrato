@@ -1,0 +1,16 @@
+namespace ContaCorrente.ApiExtrato.Models
+{
+    public class TransacoesDatabaseSettings : ITransacoesDatabaseSettings
+    {
+        public string CollectionName { get; set; }
+        public string ConnectionString { get; set; }
+        public string DatabaseName { get; set; }
+    }
+
+    public interface ITransacoesDatabaseSettings
+    {
+        string CollectionName { get; set; }
+        string ConnectionString { get; set; }
+        string DatabaseName { get; set; }
+    }
+}

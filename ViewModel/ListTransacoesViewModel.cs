@@ -1,4 +1,6 @@
 using System;
+using ContaCorrente.ApiExtrato.Enums;
+using ContaCorrente.ApiExtrato.Models;
 
 namespace ContaCorrente.ApiExtrato.ViewModels
 {
